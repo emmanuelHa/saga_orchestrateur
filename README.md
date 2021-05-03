@@ -4,12 +4,23 @@
 - un cluster kafka
 - swagger pour chaque micro service
 
-Contrairement à la choregraphie avec un coordinateur/orchestrateur les services ne consomment que des commandes et renvoient des évènements à l'orchestrator qui se charge de l'ordonnancement et des règles métiers à appliquer.  
-Les tests sont donc beaucoup plus faciles puisqu'ils ne nécessitent pas de bus 
+Contrairement à la choregraphie avec un coordinateur/orchestrateur les services 
+ne consomment que des commandes et renvoient des évènements à l'orchestrator 
+qui se charge de l'ordonnancement et des règles métiers à appliquer.  
 
 Le workflow  
  UI : /publish/order (command)   
- => OrderCreated => order service orderRegistered   
+ => OrderCreated => order service orderRegistered  
+ orderRegistered 
+ => Orchestrateur => PrepareBill => Bill Service => Bill prepared
+ => Orchestrateur => BookStock => Stock Service => Stockbooked or StockBookedFailed
+ => Orchestrateur => CreatePayment => Payment Service => Payment created
+ 
+ UI : /publish/payment/accept/ => AcceptPayment
+ => Payment service => PaymentAccepted
+ => Orchestrateur => CompleteBilling
+ => Billing service => BillingCompleted
+ => Orchestrateur 
 ...
 
 ## Pre-requis : 
@@ -30,7 +41,7 @@ Pour visualiser que les containers sont bien up :
 ```
 
 Pensez à bien stopper le cluster à la fin de vos essais.  
-Sinon au prochain demarrage jamais un des containers tombera. Vous devrez alors stopper puis redemarrer 
+Si au premier demarrage un des containers tombe alors stoppez puis redemarrez le tout. 
 (relancer Zookeeper et Kafka cluster)
 
 ## Demo
@@ -42,6 +53,7 @@ Demarrer chacun des micro service :
 > java -jar payment/target/payment.jar
 > java -jar stock/target/stock.jar
 > java -jar clientui/target/clientui.jar
+> java -jar clientui/target/orchestrateur.jar
 ```
 ##DEMO :  
 1/ Ajouter un stock en base :
@@ -103,6 +115,7 @@ http://localhost:9007/swagger-ui/#/home-controller/refusePaymentUsingPOST
 RAF : 
 - Ajouter des TI pour le cluster Kafka avec un embedded cluster 
 - Il reste des corrections à apporter pour la stabilité et la gestion des erreurs imprévues  
+- Rendre explicite la conf du nombre de retry, le delai de retry, avoir une DLQ ...
 D'ordre générale NE PAS DEBUGGER des clients consumers kafka
 
 Conclusion : l'orchestrateur est plus lisible que la version chorégraphie.  

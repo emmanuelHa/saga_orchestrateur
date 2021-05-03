@@ -5,6 +5,7 @@ import com.soat.formation.saga.stock.application.exception.StockNotFoundExceptio
 import com.soat.formation.saga.stock.domain.model.Stock;
 import com.soat.formation.saga.stock.infra.dao.StockDao;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.util.List;
 @RestController
 public class StockController {
 
-    private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(com.soat.formation.saga.stock.application.controller.StockController.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(com.soat.formation.saga.stock.application.controller.StockController.class);
 
     @Autowired
     StockDao stockDao;
@@ -45,7 +46,7 @@ public class StockController {
 
 
     @PostMapping(value = "/stock/add")
-    public ResponseEntity<Stock> ajouterCommande(@RequestBody Stock stock) {
+    public ResponseEntity<Stock> ajouterStock(@RequestBody Stock stock) {
 
         Stock nouveauStock = stockDao.save(stock);
 

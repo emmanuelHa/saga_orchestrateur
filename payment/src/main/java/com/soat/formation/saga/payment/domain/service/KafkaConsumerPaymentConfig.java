@@ -47,6 +47,7 @@ public class KafkaConsumerPaymentConfig {
         factory.setRecordFilterStrategy(record -> !CreatePayment.class.getSimpleName().equals(record.key()));
         return factory;
     }
+
     @Bean
     public ConsumerFactory<String, AcceptPayment> consumerFactoryAcceptPayment() {
         Map<String, Object> props = infraJsonProps.get("infraConsumerJsonProps");

@@ -4,7 +4,6 @@ import com.soat.formation.saga.infra.config.AbstractKafkaGenericProducer;
 import com.soat.formation.saga.infra.config.KafkaGenericProducer;
 import com.soat.formation.saga.messages.application.commands.AcceptPayment;
 import com.soat.formation.saga.messages.application.commands.RefusePayment;
-import com.soat.formation.saga.messages.application.events.BillingCompleted;
 import com.soat.formation.saga.messages.application.events.OrderCreated;
 
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,10 +31,10 @@ import java.util.UUID;
 public class HomeController {
 
     private static final String PENDING = "Pending";
+    // TODO use DTO & not HARD CODED port
+    private static final String PAYMENTS_ENDPOINT = "http://localhost:9004/payments/";
     private final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
-    // TODO use DTO & HARD CODED port
-    private static final String ENDPOINT_PAYMENTS = "http://localhost:9004/payments/";
     private final RestTemplate paymentTemplate;
     private KafkaGenericProducer<OrderCreated> kafkaOrderCreatedProducer;
     private KafkaGenericProducer<AcceptPayment> kafkaAcceptPaymentProducer;
@@ -84,15 +82,12 @@ public class HomeController {
         try {
             LOGGER.info(String.format("/publish/payment/accept/%s", uuid));
 
-            // TODO use DTO & not HARD CODED port
-            String paymentStatus = paymentTemplate.getForObject("http://localhost:9004/payments/" + uuid, String.class);
-
+            String paymentStatus = paymentTemplate.getForObject(PAYMENTS_ENDPOINT + uuid, String.class);
             if(paymentStatus == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-
             if(!PENDING.equals(paymentStatus)) {
-                LOGGER.error(String.format("Le paiement %s n'est pas au status PENDING", uuid));
+                LOGGER.error(String.format("Le paiement %s n'est pas au status PENDING mais au statut %s", uuid, paymentStatus));
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             askPaymentModuleToAcceptPaymentStatus(uuid);
@@ -104,7 +99,6 @@ public class HomeController {
             LOGGER.error("Impossible d'ajouter ce paiement");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -116,12 +110,10 @@ public class HomeController {
         try {
             LOGGER.info(String.format("/publish/payment/refuse/%s", uuid));
 
-            String paymentStatus = paymentTemplate.getForObject(ENDPOINT_PAYMENTS + uuid, String.class);
-
+            String paymentStatus = paymentTemplate.getForObject(PAYMENTS_ENDPOINT + uuid, String.class);
             if(paymentStatus == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-
             if(!PENDING.equals(paymentStatus)) {
                 LOGGER.error(String.format("Le paiement %s n'est pas au status PENDING", uuid));
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -135,7 +127,6 @@ public class HomeController {
             LOGGER.error("Impossible d'ajouter ce paiement" + ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -145,7 +136,7 @@ public class HomeController {
         JSONObject paymentToUpdateStatusJson = new JSONObject();
         paymentToUpdateStatusJson.put("uuid", uuid);
         HttpEntity<String> request = new HttpEntity<>(paymentToUpdateStatusJson.toString(), headers);
-        paymentTemplate.postForEntity("http://localhost:9004/payment/accept", request, HttpStatus.class);
+        paymentTemplate.postForEntity(PAYMENTS_ENDPOINT + "payment/accept", request, HttpStatus.class);
     }
 
     private void askPaymentModuleToRefusePaymentStatus(String uuid) {
@@ -154,7 +145,7 @@ public class HomeController {
         JSONObject paymentToUpdateStatusJson = new JSONObject();
         paymentToUpdateStatusJson.put("uuid", uuid);
         HttpEntity<String> request = new HttpEntity<>(paymentToUpdateStatusJson.toString(), headers);
-        paymentTemplate.postForEntity("http://localhost:9004/payment/refuse", request, HttpStatus.class);
+        paymentTemplate.postForEntity(PAYMENTS_ENDPOINT + "payment/refuse", request, HttpStatus.class);
     }
 
 }

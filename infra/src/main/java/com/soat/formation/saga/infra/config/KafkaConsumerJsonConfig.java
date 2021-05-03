@@ -29,6 +29,7 @@ public class KafkaConsumerJsonConfig<T> {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, resetOffsetStrategy);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         return props;
     }

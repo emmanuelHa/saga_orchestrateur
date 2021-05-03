@@ -33,12 +33,17 @@ public abstract class AbstractKafkaGenericProducer<T extends Event> {
     abstract public KafkaGenericProducer<T> mapEventTypeToTopic(Class<T> eventClass, String topicName);
 
     public ListenableFuture<SendResult<String, T>> send(T event) {
-        KafkaTemplate<String, T> stringObjectKafkaTemplate = genericJsonKafkaTemplate();
+        KafkaTemplate<String, T> eventByStringKafkaTemplate = genericJsonKafkaTemplate();
         Class<T> eventClass = (Class<T>) event.getClass();
         String topic = getTopicByEventType(eventClass);
         LOGGER.info(String.format("About to send %s to topic %s", eventClass.getSimpleName(), topic));
-        return stringObjectKafkaTemplate.send(topic,
+        return eventByStringKafkaTemplate.send(topic,
                                               eventClass.getSimpleName(), event);
+    }
+
+    public void flush() {
+        KafkaTemplate<String, T> eventByStringKafkaTemplate = genericJsonKafkaTemplate();
+        eventByStringKafkaTemplate.flush();
     }
 
     public AbstractKafkaGenericProducer<T> mapEventClassToTopic(Function<Class<T>, String> mapEventClassToTopicFunction) {
@@ -62,7 +67,7 @@ public abstract class AbstractKafkaGenericProducer<T extends Event> {
         return getMappingEventClassToTopic().apply(eventTypeClass);
     }
 
-    public Function<Class<T>, String> getMappingEventClassToTopic() {
+    private Function<Class<T>, String> getMappingEventClassToTopic() {
         return eventClassToTopicFunction;
     }
 

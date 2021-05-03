@@ -36,7 +36,7 @@ public class OrderService {
     }
 
 
-    @KafkaListener(topics = "order", groupId = "order-registerOrder", containerFactory="registerOrderKafkaListenerContainerFactory")
+    @KafkaListener(topics = "order", groupId = "coordinator-registerOrder", containerFactory="registerOrderKafkaListenerContainerFactory")
     @Transactional
     public void consume(RegisterOrder registerOrder) {
         LOGGER.info(String.format("Consumed registerOrder: %s", registerOrder));

@@ -20,7 +20,7 @@ public class OrderController {
     OrderRepository orderRepository;
 
     @GetMapping(value = "/orders")
-    public List<Order> recupererListCommandes() {
+    public List<Order> getOrders() {
         LOGGER.debug("/orders");
         return orderRepository.findAll();
     }

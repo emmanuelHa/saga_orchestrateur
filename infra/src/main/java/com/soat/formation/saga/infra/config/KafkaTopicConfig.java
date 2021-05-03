@@ -13,11 +13,13 @@ import java.util.Map;
 @Configuration
 public class KafkaTopicConfig {
 
-    private int num5PartitionsForOrder = 10;
-    private int num5PartitionsForPayment = 5;
-    private int num2PartitionsForStock = 2;
-    private int num2PartitionsForBilling = 2;
-    private int num1PartitionForDelivery = 1;
+    // no need many partitions per topic because we use different group
+    // and we don't really need to keep order of messages so ...
+    private int num3PartitionsForOrder = 3;
+    private int num3PartitionsForPayment = 3;
+    private int num3PartitionsForStock = 3;
+    private int num3PartitionsForBilling = 3;
+    private int num3PartitionForDelivery = 3;
     // dev environment
     private int replicationFactorOrder_1 = 1;
 
@@ -33,22 +35,22 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic topicOrder() {
-        return new NewTopic("order", num5PartitionsForOrder, (short) replicationFactorOrder_1);
+        return new NewTopic("order", num3PartitionsForOrder, (short) replicationFactorOrder_1);
     }
     @Bean
     public NewTopic topicStock() {
-        return new NewTopic("stock", num2PartitionsForStock, (short) replicationFactorOrder_1);
+        return new NewTopic("stock", num3PartitionsForStock, (short) replicationFactorOrder_1);
     }
     @Bean
     public NewTopic topicPayment() {
-        return new NewTopic("payment", num5PartitionsForPayment, (short) replicationFactorOrder_1);
+        return new NewTopic("payment", num3PartitionsForPayment, (short) replicationFactorOrder_1);
     }
     @Bean
     public NewTopic topicBilling() {
-        return new NewTopic("billing", num2PartitionsForBilling, (short) replicationFactorOrder_1);
+        return new NewTopic("billing", num3PartitionsForBilling, (short) replicationFactorOrder_1);
     }
     @Bean
     public NewTopic topicDelivery() {
-        return new NewTopic("delivery", num1PartitionForDelivery, (short) replicationFactorOrder_1);
+        return new NewTopic("delivery", num3PartitionForDelivery, (short) replicationFactorOrder_1);
     }
 }
