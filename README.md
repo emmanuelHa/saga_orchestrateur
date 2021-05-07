@@ -10,7 +10,7 @@ qui se charge de l'ordonnancement et des règles métiers à appliquer.
 
 Le workflow  
  UI : /publish/order (command)   
- => OrderCreated => order service orderRegistered  
+ => OrderCreated => Orchestrateur => RegisterOrder => Order service => OrderRegistered  
  orderRegistered 
  => Orchestrateur => PrepareBill => Bill Service => Bill prepared
  => Orchestrateur => BookStock => Stock Service => Stockbooked or StockBookedFailed
@@ -55,7 +55,7 @@ Demarrer chacun des micro service :
 > java -jar clientui/target/clientui.jar
 > java -jar clientui/target/orchestrateur.jar
 ```
-##DEMO :  
+ 
 1/ Ajouter un stock en base :
 http://localhost:9003/swagger-ui/#/stock-controller/ajouterCommandeUsingPOST
 Exemple :
@@ -112,16 +112,20 @@ http://localhost:9007/swagger-ui/#/home-controller/refusePaymentUsingPOST
 - https://docs.spring.io/spring-kafka/reference/html/  
 - https://thepracticaldeveloper.com/spring-boot-kafka-config/
 
-RAF : 
+#### RAF : 
 - Ajouter des TI pour le cluster Kafka avec un embedded cluster 
 - Il reste des corrections à apporter pour la stabilité et la gestion des erreurs imprévues  
 - Rendre explicite la conf du nombre de retry, le delai de retry, avoir une DLQ ...
 D'ordre générale NE PAS DEBUGGER des clients consumers kafka
 
-Conclusion : l'orchestrateur est plus lisible que la version chorégraphie.  
+## Conclusion : l'orchestrateur est plus lisible que la version chorégraphie.  
 Spring kakfa n'est peut être pas adapté pour une implémentation des Sagas en entreprise car 
 encore trop bas niveau.  
 Voir Axon ou bien https://github.com/eventuate-tram/eventuate-tram-core
+
+Ce repository se base sur le repository suivant :  
+https://github.com/Spaceva/MasterClassSagaPattern/ en dotnet qui utilise 
+le framework massTransit https://masstransit-project.com/
 
 
 
